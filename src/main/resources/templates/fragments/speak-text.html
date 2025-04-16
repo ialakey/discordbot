@@ -1,0 +1,17 @@
+<div th:fragment="speakText">
+    <h3>Озвучить текст в голосовом канале</h3>
+    <form th:action="@{/admin/speakText}" method="post" class="row g-3">
+        <div class="col-md-5">
+            <select name="voiceChannelName" class="form-select">
+                <option th:each="channel : ${voiceChannels}" th:value="${channel}" th:text="${channel}"></option>
+            </select>
+        </div>
+        <div class="col-md-12">
+            <label for="textToSpeak" class="form-label">Введите текст для озвучивания:</label>
+            <textarea id="textToSpeak" name="textToSpeak" class="form-control" rows="4" required></textarea>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-success w-100">Озвучить</button>
+        </div>
+    </form>
+</div>

@@ -65,7 +65,7 @@ public class AdminController {
         model.addAttribute("discordUsers", discordUsers);
         model.addAttribute("discordRoles", discordRoles);
 
-        return "admin_panel";
+        return "admin";
     }
 
     @PostMapping("/addBlockedRole")
@@ -77,7 +77,7 @@ public class AdminController {
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
 
-        return "admin_panel";
+        return "admin";
     }
 
     @PostMapping("/addBlockedUser")
@@ -87,7 +87,7 @@ public class AdminController {
         model.addAttribute("blockedUsers", blockedEntityService.getBlockedNames());
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
-        return "admin_panel";
+        return "admin";
     }
 
     @PostMapping("/removeBlockedUser")
@@ -97,7 +97,7 @@ public class AdminController {
         model.addAttribute("blockedUsers", blockedEntityService.getBlockedNames());
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
-        return "admin_panel";
+        return "admin";
     }
 
     @PostMapping("/removeBlockedRole")
@@ -107,7 +107,7 @@ public class AdminController {
         model.addAttribute("blockedUsers", blockedEntityService.getBlockedNames());
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
-        return "admin_panel";
+        return "admin";
     }
 
     @GetMapping("/getAllDiscordUsers")
@@ -140,7 +140,7 @@ public class AdminController {
         Guild guild = getGuild();
         if (guild == null) {
             model.addAttribute("error", "Гильдия не найдена.");
-            return "admin_panel";
+            return "admin";
         }
 
         VoiceChannel channel = guild.getVoiceChannelsByName(voiceChannelName, true)
@@ -148,13 +148,13 @@ public class AdminController {
 
         if (channel == null) {
             model.addAttribute("error", "Голосовой канал не найден: " + voiceChannelName);
-            return "admin_panel";
+            return "admin";
         }
 
         File audioFile = new File("src/main/resources/audio/csgo.mp3");
         if (!audioFile.exists()) {
             model.addAttribute("error", "Аудиофайл не найден.");
-            return "admin_panel";
+            return "admin";
         }
 
         guild.getAudioManager().openAudioConnection(channel);
@@ -212,7 +212,7 @@ public class AdminController {
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
 
-        return "admin_panel";
+        return "admin";
     }
 
     @GetMapping("/getAudioFiles")
@@ -241,7 +241,7 @@ public class AdminController {
         if (guild == null) {
             model.addAttribute("error", "Гильдия не найдена");
             populateModel(model);
-            return "admin_panel";
+            return "admin";
         }
 
         VoiceChannel channel = guild.getVoiceChannelsByName(voiceChannelName, true)
@@ -249,14 +249,14 @@ public class AdminController {
         if (channel == null) {
             model.addAttribute("error", "Канал не найден: " + voiceChannelName);
             populateModel(model);
-            return "admin_panel";
+            return "admin";
         }
 
         File audioFile = new File("src/main/resources/audio/" + audioFileName);
         if (!audioFile.exists()) {
             model.addAttribute("error", "Файл не найден: " + audioFileName);
             populateModel(model);
-            return "admin_panel";
+            return "admin";
         }
 
         guild.getAudioManager().openAudioConnection(channel);
@@ -289,7 +289,7 @@ public class AdminController {
 
         model.addAttribute("message", "Аудио воспроизводится");
         populateModel(model);
-        return "admin_panel";
+        return "admin";
     }
 
     private void populateModel(Model model) {
@@ -311,7 +311,7 @@ public class AdminController {
         if (guild == null) {
             model.addAttribute("error", "Гильдия не найдена.");
             populateModel(model);
-            return "admin_panel";
+            return "admin";
         }
 
         VoiceChannel channel = guild.getVoiceChannelsByName(voiceChannelName, true)
@@ -319,14 +319,14 @@ public class AdminController {
         if (channel == null) {
             model.addAttribute("error", "Канал не найден: " + voiceChannelName);
             populateModel(model);
-            return "admin_panel";
+            return "admin";
         }
 
         File audioFile = synthesizeWithSapiTTS(textToSpeak);
         if (audioFile == null || !audioFile.exists()) {
             model.addAttribute("error", "Не удалось создать аудиофайл.");
             populateModel(model);
-            return "admin_panel";
+            return "admin";
         }
 
         guild.getAudioManager().openAudioConnection(channel);
@@ -359,7 +359,7 @@ public class AdminController {
 
         model.addAttribute("message", "Сообщение озвучено.");
         populateModel(model);
-        return "admin_panel";
+        return "admin";
     }
 
 

@@ -1,0 +1,30 @@
+<div th:fragment="blockedUsers">
+    <h3>Заблокированные пользователи</h3>
+    <form th:action="@{/admin/addBlockedUser}" method="post" class="row g-2 mb-3">
+        <div class="col-md-10">
+            <select name="username" class="form-select">
+                <option th:each="user : ${discordUsers}" th:value="${user}" th:text="${user}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-danger w-100">Заблокировать</button>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+        <tr><th>Имя пользователя</th><th>Действие</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${blockedUsers}">
+            <td th:text="${user}"></td>
+            <td>
+                <form th:action="@{/admin/removeBlockedUser}" method="post" class="d-inline">
+                    <input type="hidden" name="username" th:value="${user}" />
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

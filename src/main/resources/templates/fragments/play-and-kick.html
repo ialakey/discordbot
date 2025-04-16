@@ -1,0 +1,13 @@
+<div th:fragment="playAndKick">
+    <h3>Воспроизвести аудио и отключить пользователей</h3>
+    <form th:action="@{/admin/playAndKick}" method="post" class="row g-2">
+        <div class="col-md-10">
+            <select name="voiceChannelName" class="form-select">
+                <option th:each="vc : ${voiceChannels}" th:value="${vc}" th:text="${vc}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-warning w-100">Отключить с музыкой</button>
+        </div>
+    </form>
+</div>

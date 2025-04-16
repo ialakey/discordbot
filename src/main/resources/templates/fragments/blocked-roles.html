@@ -1,0 +1,30 @@
+<div th:fragment="blockedRoles">
+    <h3>Заблокированные роли</h3>
+    <form th:action="@{/admin/addBlockedRole}" method="post" class="row g-2 mb-3">
+        <div class="col-md-10">
+            <select name="roleName" class="form-select">
+                <option th:each="role : ${discordRoles}" th:value="${role}" th:text="${role}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-danger w-100">Заблокировать</button>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+        <tr><th>Название роли</th><th>Действие</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="role : ${blockedRoles}">
+            <td th:text="${role}"></td>
+            <td>
+                <form th:action="@{/admin/removeBlockedRole}" method="post" class="d-inline">
+                    <input type="hidden" name="roleName" th:value="${role}" />
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

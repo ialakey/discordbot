@@ -1,0 +1,18 @@
+<div th:fragment="playAudio">
+    <h3>Воспроизвести аудио в голосовом канале</h3>
+    <form th:action="@{/admin/playAudioFile}" method="post" class="row g-2">
+        <div class="col-md-5">
+            <select name="voiceChannelName" class="form-select">
+                <option th:each="channel : ${voiceChannels}" th:value="${channel}" th:text="${channel}"></option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <select name="audioFileName" class="form-select">
+                <option th:each="file : ${audioFiles}" th:value="${file}" th:text="${file}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Воспроизвести</button>
+        </div>
+    </form>
+</div>

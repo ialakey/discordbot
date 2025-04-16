@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head th:replace="layout :: head"></head>
+<body>
+<div class="container">
+
+    <h1 class="mb-4">Панель Администратора</h1>
+
+    <div th:replace="fragments/blocked-users :: blockedUsers"></div>
+    <div th:replace="fragments/blocked-roles :: blockedRoles"></div>
+    <div th:replace="fragments/play-and-kick :: playAndKick"></div>
+    <div th:replace="fragments/play-audio :: playAudio"></div>
+    <div th:replace="fragments/speak-text :: speakText"></div>
+
+</div>
+</body>
+</html>
