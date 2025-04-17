@@ -2,6 +2,7 @@ package com.alakey.discordbot.bot.command;
 
 import com.alakey.discordbot.bot.audio.DeleteCommandTest;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.util.HashMap;
@@ -10,7 +11,8 @@ import java.util.Map;
 public class CommandManager {
 
     private final Map<String, Command> commands = new HashMap<>();
-    private static final String AUDIO_DIRECTORY = "src/main/resources/audio/";
+    @Value("${bot.audio-folder}")
+    private String pathAudio;
 
     public CommandManager() {
         commands.put("!delete", new DeleteCommandTest());
@@ -29,7 +31,7 @@ public class CommandManager {
                 command.execute(event);
             } else {
                 String fileName = commandKey.substring(1);
-                File audioFile = new File(AUDIO_DIRECTORY + fileName + ".mp3");
+                File audioFile = new File(pathAudio + fileName + ".mp3");
 
                 if (audioFile.exists()) {
                     new PlayFileCommand(audioFile).execute(event);

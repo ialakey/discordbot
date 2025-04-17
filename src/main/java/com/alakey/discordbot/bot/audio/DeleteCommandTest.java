@@ -10,15 +10,19 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 
 @Slf4j
 public class DeleteCommandTest implements Command {
 
+    @Value("${bot.audio-folder}")
+    private String pathAudio;
+
     @Override
     public void execute(MessageReceivedEvent event) {
-        File audioFile = new File("src/main/resources/audio/expansion_of_territory.mp3");
+        File audioFile = new File(pathAudio + "expansion_of_territory.mp3");
 
         if (!audioFile.exists()) {
             event.getChannel().sendMessage("Файл не найден: expansion_of_territory.mp3").queue();

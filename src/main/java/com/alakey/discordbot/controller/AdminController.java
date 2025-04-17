@@ -15,7 +15,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import com.alakey.discordbot.bot.config.JdaConfig;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +33,8 @@ public class AdminController {
 
     @Value("${discord.bot.guildById}")
     private String guildById;
+    @Value("${bot.audio-folder}")
+    private String pathAudio;
     private final JdaConfig jdaConfig;
     private final BlockedEntityService blockedEntityService;
     private final GuildService guildService;
@@ -149,7 +150,7 @@ public class AdminController {
             return fragment;
         }
 
-        File audioFile = new File("src/main/resources/audio/csgo.mp3");
+        File audioFile = new File(pathAudio+ "csgo.mp3");
         if (!audioFile.exists()) {
             model.addAttribute("error", "Аудиофайл не найден.");
             return fragment;
@@ -215,7 +216,7 @@ public class AdminController {
 
     @GetMapping("/getAudioFiles")
     public List<String> getAudioFiles() {
-        File audioDir = new File("src/main/resources/audio/");
+        File audioDir = new File(pathAudio);
         if (!audioDir.exists() || !audioDir.isDirectory()) return List.of();
 
         File[] files = audioDir.listFiles((dir, name) -> name.endsWith(".mp3"));
@@ -237,7 +238,7 @@ public class AdminController {
 
         Guild guild = guildService.getGuild();
         VoiceChannel channel = guildService.findVoiceChannel(voiceChannelName);
-        File file = new File("src/main/resources/audio/" + audioFileName);
+        File file = new File(pathAudio + audioFileName);
 
         if (guild == null || channel == null || !file.exists()) {
             model.addAttribute("error", "Ошибка воспроизведения");
