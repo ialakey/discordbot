@@ -9,4 +9,7 @@ RUN ./gradlew bootJar --no-daemon
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
+
+COPY src/main/resources/audio/ audio/
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
