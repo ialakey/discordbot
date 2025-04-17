@@ -1,8 +1,7 @@
 package com.alakey.discordbot.controller;
 
 import com.alakey.discordbot.bot.audio.AudioPlayerSendHandler;
-import com.alakey.discordbot.service.BlockedEntityService;
-import com.alakey.discordbot.service.DiscordCacheService;
+import com.alakey.discordbot.service.*;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -38,13 +36,23 @@ public class AdminController {
     private String guildById;
     private final JdaConfig jdaConfig;
     private final BlockedEntityService blockedEntityService;
+    private final GuildService guildService;
+    private final AudioService audioService;
+    private final TextToSpeechService textToSpeechService;
+    private final String fragment = "admin";
 
-    private final DiscordCacheService discordCacheService;
-
-    public AdminController(JdaConfig jdaConfig, BlockedEntityService blockedEntityService, DiscordCacheService discordCacheService) {
+    public AdminController(
+            JdaConfig jdaConfig,
+            BlockedEntityService blockedEntityService,
+            GuildService guildService,
+            AudioService audioService,
+            TextToSpeechService textToSpeechService
+    ) {
         this.jdaConfig = jdaConfig;
         this.blockedEntityService = blockedEntityService;
-        this.discordCacheService = discordCacheService;
+        this.guildService = guildService;
+        this.audioService = audioService;
+        this.textToSpeechService = textToSpeechService;
     }
 
     private Guild getGuild() {
@@ -65,7 +73,7 @@ public class AdminController {
         model.addAttribute("discordUsers", discordUsers);
         model.addAttribute("discordRoles", discordRoles);
 
-        return "admin";
+        return fragment;
     }
 
     @PostMapping("/addBlockedRole")
@@ -77,7 +85,7 @@ public class AdminController {
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
 
-        return "admin";
+        return fragment;
     }
 
     @PostMapping("/addBlockedUser")
@@ -87,7 +95,7 @@ public class AdminController {
         model.addAttribute("blockedUsers", blockedEntityService.getBlockedNames());
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
-        return "admin";
+        return fragment;
     }
 
     @PostMapping("/removeBlockedUser")
@@ -97,7 +105,7 @@ public class AdminController {
         model.addAttribute("blockedUsers", blockedEntityService.getBlockedNames());
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
-        return "admin";
+        return fragment;
     }
 
     @PostMapping("/removeBlockedRole")
@@ -107,32 +115,22 @@ public class AdminController {
         model.addAttribute("blockedUsers", blockedEntityService.getBlockedNames());
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
-        return "admin";
+        return fragment;
     }
 
     @GetMapping("/getAllDiscordUsers")
     public List<String> getAllDiscordUsers() {
-        discordCacheService.refreshCache();
-        return discordCacheService.getCachedUsernames();
+        return guildService.getAllUsers();
     }
 
     @GetMapping("/getAllDiscordRoles")
     public List<String> getAllDiscordRoles() {
-        List<String> rolesList = new ArrayList<>();
-        Guild guild = getGuild();
-        if (guild != null) {
-            for (Role role : guild.getRoles()) {
-                rolesList.add(role.getName());
-            }
-        }
-        return rolesList;
+        return guildService.getAllRoles();
     }
 
     @GetMapping("/getAllVoiceChannels")
     public List<String> getAllVoiceChannels() {
-        Guild guild = getGuild();
-        if (guild == null) return List.of();
-        return guild.getVoiceChannels().stream().map(vc -> vc.getName()).toList();
+        return guildService.getAllVoiceChannels();
     }
 
     @PostMapping("/playAndKick")
@@ -140,7 +138,7 @@ public class AdminController {
         Guild guild = getGuild();
         if (guild == null) {
             model.addAttribute("error", "Гильдия не найдена.");
-            return "admin";
+            return fragment;
         }
 
         VoiceChannel channel = guild.getVoiceChannelsByName(voiceChannelName, true)
@@ -148,13 +146,13 @@ public class AdminController {
 
         if (channel == null) {
             model.addAttribute("error", "Голосовой канал не найден: " + voiceChannelName);
-            return "admin";
+            return fragment;
         }
 
         File audioFile = new File("src/main/resources/audio/csgo.mp3");
         if (!audioFile.exists()) {
             model.addAttribute("error", "Аудиофайл не найден.");
-            return "admin";
+            return fragment;
         }
 
         guild.getAudioManager().openAudioConnection(channel);
@@ -212,7 +210,7 @@ public class AdminController {
         model.addAttribute("discordRoles", getAllDiscordRoles());
         model.addAttribute("discordUsers", getAllDiscordUsers());
 
-        return "admin";
+        return fragment;
     }
 
     @GetMapping("/getAudioFiles")
@@ -237,59 +235,19 @@ public class AdminController {
             @RequestParam String audioFileName,
             Model model) {
 
-        Guild guild = getGuild();
-        if (guild == null) {
-            model.addAttribute("error", "Гильдия не найдена");
-            populateModel(model);
-            return "admin";
+        Guild guild = guildService.getGuild();
+        VoiceChannel channel = guildService.findVoiceChannel(voiceChannelName);
+        File file = new File("src/main/resources/audio/" + audioFileName);
+
+        if (guild == null || channel == null || !file.exists()) {
+            model.addAttribute("error", "Ошибка воспроизведения");
+        } else {
+            audioService.playAudio(guild, channel, file, () -> guild.getAudioManager().closeAudioConnection());
+            model.addAttribute("message", "Воспроизведение начато");
         }
 
-        VoiceChannel channel = guild.getVoiceChannelsByName(voiceChannelName, true)
-                .stream().findFirst().orElse(null);
-        if (channel == null) {
-            model.addAttribute("error", "Канал не найден: " + voiceChannelName);
-            populateModel(model);
-            return "admin";
-        }
-
-        File audioFile = new File("src/main/resources/audio/" + audioFileName);
-        if (!audioFile.exists()) {
-            model.addAttribute("error", "Файл не найден: " + audioFileName);
-            populateModel(model);
-            return "admin";
-        }
-
-        guild.getAudioManager().openAudioConnection(channel);
-
-        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-        AudioSourceManagers.registerRemoteSources(playerManager);
-        AudioSourceManagers.registerLocalSource(playerManager);
-
-        AudioPlayer player = playerManager.createPlayer();
-        guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
-
-        playerManager.loadItem(audioFile.getAbsolutePath(), new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                player.playTrack(track);
-                player.addListener(new AudioEventAdapter() {
-                    @Override
-                    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-                        if (endReason.mayStartNext) {
-                            guild.kickVoiceMember(guild.getSelfMember()).queue();
-                        }
-                    }
-                });
-            }
-
-            @Override public void playlistLoaded(AudioPlaylist playlist) {}
-            @Override public void noMatches() { log.warn("Файл не найден"); }
-            @Override public void loadFailed(FriendlyException exception) { log.error("Ошибка загрузки", exception); }
-        });
-
-        model.addAttribute("message", "Аудио воспроизводится");
         populateModel(model);
-        return "admin";
+        return fragment;
     }
 
     private void populateModel(Model model) {
@@ -311,7 +269,7 @@ public class AdminController {
         if (guild == null) {
             model.addAttribute("error", "Гильдия не найдена.");
             populateModel(model);
-            return "admin";
+            return fragment;
         }
 
         VoiceChannel channel = guild.getVoiceChannelsByName(voiceChannelName, true)
@@ -319,14 +277,14 @@ public class AdminController {
         if (channel == null) {
             model.addAttribute("error", "Канал не найден: " + voiceChannelName);
             populateModel(model);
-            return "admin";
+            return fragment;
         }
 
-        File audioFile = synthesizeWithSapiTTS(textToSpeak);
+        File audioFile = textToSpeechService.synthesize(textToSpeak);
         if (audioFile == null || !audioFile.exists()) {
             model.addAttribute("error", "Не удалось создать аудиофайл.");
             populateModel(model);
-            return "admin";
+            return fragment;
         }
 
         guild.getAudioManager().openAudioConnection(channel);
@@ -359,40 +317,6 @@ public class AdminController {
 
         model.addAttribute("message", "Сообщение озвучено.");
         populateModel(model);
-        return "admin";
+        return fragment;
     }
-
-
-    private File synthesizeWithSapiTTS(String text) {
-        try {
-            File outputFile = File.createTempFile("tts_audio", ".wav");
-
-            String escapedText = text.replace("'", "''");
-
-            String command = String.format(
-                    "powershell -Command \"$synth = New-Object -ComObject SAPI.SpVoice; " +
-                            "$voice = $synth.GetVoices() | Where-Object { $_.GetDescription() -like '*%s*' }; " +
-                            "$synth.Voice = $voice.Item(0); " +
-                            "$file = '%s'; " +
-                            "$audio = New-Object -ComObject SAPI.SpFileStream; " +
-                            "$audio.Open($file, 3, $null); " +
-                            "$synth.AudioOutputStream = $audio; " +
-                            "$synth.Speak('%s'); " +
-                            "$audio.Close()\"",
-                    "Microsoft David",
-                    outputFile.getAbsolutePath().replace("\\", "\\\\"),
-                    escapedText
-            );
-
-            Process process = Runtime.getRuntime().exec(command);
-            process.waitFor();
-
-            return outputFile;
-        } catch (IOException | InterruptedException e) {
-            log.error("Ошибка при синтезе речи", e);
-            return null;
-        }
-    }
-
-
 }
