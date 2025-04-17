@@ -1,5 +1,6 @@
 package com.alakey.discordbot.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,12 +14,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Value("${username}")
+    private String username;
+
+    @Value("${password}")
+    private String password;
+
     @Bean
     public UserDetailsService userDetailsService() {
         return new InMemoryUserDetailsManager(
                 User.withDefaultPasswordEncoder()
-                        .username("admin")
-                        .password("admin")
+                        .username(username)
+                        .password(password)
                         .roles("ADMIN")
                         .build()
         );
@@ -38,6 +45,11 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
+                )
+                .sessionManagement(session -> session
+                        .invalidSessionUrl("/login?sessionExpired=true")
+                        .maximumSessions(1)
+                        .expiredUrl("/login?expired=true")
                 );
 
         return http.build();
