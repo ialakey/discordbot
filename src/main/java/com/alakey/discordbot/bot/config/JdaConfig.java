@@ -36,7 +36,7 @@ public class JdaConfig {
                 .addEventListeners(
                         voiceChannelListener
                 )
-                .setActivity(Activity.watching("на пидоров несчастных"))
+                .setActivity(Activity.watching("на пидоров"))
                 .build();
         jda.awaitReady();
     }
