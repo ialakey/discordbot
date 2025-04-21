@@ -1,5 +1,8 @@
 package com.alakey.discordbot.service;
 
+import com.tetradotoxina.gtts4j.GTTS4J;
+import com.tetradotoxina.gtts4j.exception.GTTS4JException;
+import com.tetradotoxina.gtts4j.impl.GTTS4JImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -10,36 +13,23 @@ import java.io.IOException;
 @Slf4j
 public class TextToSpeechServiceImpl implements TextToSpeechService {
 
-    private static final String VOICE_NAME = "Microsoft David";
-
     @Override
     public File synthesize(String text) {
         try {
-            File outputFile = File.createTempFile("tts_audio", ".wav");
-            String escapedText = text.replace("'", "''");
+            GTTS4J gtts4j = new GTTS4JImpl();
+            String lang = "ru";
+            boolean slow = false;
 
-            String command = String.format(
-                "powershell -Command \"$synth = New-Object -ComObject SAPI.SpVoice; " +
-                "$voice = $synth.GetVoices() | Where-Object { $_.GetDescription() -like '*%s*' }; " +
-                "$synth.Voice = $voice.Item(0); " +
-                "$file = '%s'; " +
-                "$audio = New-Object -ComObject SAPI.SpFileStream; " +
-                "$audio.Open($file, 3, $null); " +
-                "$synth.AudioOutputStream = $audio; " +
-                "$synth.Speak('%s'); " +
-                "$audio.Close()\"",
-                VOICE_NAME,
-                outputFile.getAbsolutePath().replace("\\", "\\\\"),
-                escapedText
-            );
+            byte[] data = gtts4j.textToSpeech(text, lang, slow);
 
-            Process process = Runtime.getRuntime().exec(command);
-            process.waitFor();
-            return outputFile;
+            File tempMp3 = File.createTempFile("tts_audio", ".mp3");
+            gtts4j.saveFile(tempMp3.getAbsolutePath(), data, true);
 
-        } catch (InterruptedException | IOException e) {
-            log.error("Ошибка при синтезе речи", e);
-            return null;
+            log.info("Аудиофайл сохранён: {}", tempMp3.getAbsolutePath());
+
+            return tempMp3;
+        } catch (IOException | GTTS4JException e) {
+            throw new RuntimeException("Ошибка при синтезе речи через gtts4j", e);
         }
     }
 }
