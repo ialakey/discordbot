@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -18,8 +19,11 @@ public class VoiceChannelListener extends ListenerAdapter {
     private final CommandManager commandManager;
     private final BlockedEntityService blockedEntityService;
 
-    public VoiceChannelListener(BlockedEntityService blockedEntityService) {
-        this.commandManager = new CommandManager();
+    public VoiceChannelListener(
+            BlockedEntityService blockedEntityService,
+            @Value("${bot.audio-folder}") String pathAudio
+    ) {
+        this.commandManager = new CommandManager(pathAudio);
         this.blockedEntityService = blockedEntityService;
     }
 
