@@ -17,19 +17,23 @@ import java.io.File;
 public class PlayFileCommand implements Command {
 
     private final File audioFile;
+    private final String voiceChannelName;
 
-    public PlayFileCommand(File audioFile) {
+    public PlayFileCommand(File audioFile, String voiceChannelName) {
         this.audioFile = audioFile;
+        this.voiceChannelName = voiceChannelName;
     }
 
     @Override
     public void execute(MessageReceivedEvent event) {
+        String targetChannel = (voiceChannelName != null) ? voiceChannelName : "дискорд заебал лагать";
+
         VoiceChannel channel = event.getGuild()
-                .getVoiceChannelsByName("дискорд заебал лагать", true)
+                .getVoiceChannelsByName(targetChannel, true)
                 .stream().findFirst().orElse(null);
 
         if (channel == null) {
-            event.getChannel().sendMessage("Не найден голосовой канал.").queue();
+            event.getChannel().sendMessage("Голосовой канал не найден: " + targetChannel).queue();
             return;
         }
 

@@ -24,17 +24,20 @@ public class CommandManager {
 
         if (message.startsWith("!")) {
             String[] parts = message.split(" ", 2);
-            String commandKey = parts[0];
 
+            String commandKey = parts[0];
             Command command = commands.get(commandKey);
+
             if (command != null) {
                 command.execute(event);
             } else {
                 String fileName = commandKey.substring(1) + ".mp3";
+                String voiceChannelName = (parts.length > 1) ? parts[1].trim() : null;
+
                 File audioFile = new File(pathAudio, fileName);
 
                 if (audioFile.exists()) {
-                    new PlayFileCommand(audioFile).execute(event);
+                    new PlayFileCommand(audioFile, voiceChannelName).execute(event);
                 } else {
                     event.getChannel().sendMessage("Файл не найден: " + fileName).queue();
                 }
