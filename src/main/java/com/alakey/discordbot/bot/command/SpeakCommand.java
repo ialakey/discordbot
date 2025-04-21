@@ -6,6 +6,9 @@ import com.sedmelluq.discord.lavaplayer.player.event.*;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
+import com.tetradotoxina.gtts4j.GTTS4J;
+import com.tetradotoxina.gtts4j.exception.GTTS4JException;
+import com.tetradotoxina.gtts4j.impl.GTTS4JImpl;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -19,7 +22,7 @@ public class SpeakCommand implements Command {
     @Override
     public void execute(MessageReceivedEvent event) {
         String messageContent = event.getMessage().getContentRaw();
-        String textToSpeak = messageContent.replace("!speak ", "");
+        String textToSpeak = messageContent.replace("!speak ", "").trim();
 
         if (textToSpeak.isEmpty()) {
             event.getChannel().sendMessage("Пожалуйста, укажите текст для озвучивания!").queue();
@@ -42,38 +45,27 @@ public class SpeakCommand implements Command {
                 error -> log.warn("Не удалось удалить сообщение", error)
         );
 
-        File audioFile = synthesizeWithSapiTTS(textToSpeak);
+        File audioFile = synthesizeWithGtts(textToSpeak);
 
         playAudioAndLeaveAfter(channel, audioFile, event);
     }
 
-    private File synthesizeWithSapiTTS(String text) {
+    private File synthesizeWithGtts(String text) {
         try {
-            File outputFile = File.createTempFile("tts_audio", ".wav");
+            GTTS4J gtts4j = new GTTS4JImpl();
+            String lang = "ru";
+            boolean slow = false;
 
-            String escapedText = text.replace("'", "''");
+            byte[] data = gtts4j.textToSpeech(text, lang, slow);
 
-            String command = String.format(
-                    "powershell -Command \"$synth = New-Object -ComObject SAPI.SpVoice; " +
-                            "$voice = $synth.GetVoices() | Where-Object { $_.GetDescription() -like '*%s*' }; " +
-                            "$synth.Voice = $voice.Item(0); " +
-                            "$file = '%s'; " +
-                            "$audio = New-Object -ComObject SAPI.SpFileStream; " +
-                            "$audio.Open($file, 3, $null); " +
-                            "$synth.AudioOutputStream = $audio; " +
-                            "$synth.Speak('%s'); " +
-                            "$audio.Close()\"",
-                    "Microsoft David",
-                    outputFile.getAbsolutePath().replace("\\", "\\\\"),
-                    escapedText
-            );
+            File tempMp3 = File.createTempFile("tts_audio", ".mp3");
+            gtts4j.saveFile(tempMp3.getAbsolutePath(), data, true);
 
-            Process process = Runtime.getRuntime().exec(command);
-            process.waitFor();
+            log.info("Аудиофайл сохранён: {}", tempMp3.getAbsolutePath());
 
-            return outputFile;
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Ошибка при синтезе речи через SAPI", e);
+            return tempMp3;
+        } catch (IOException | GTTS4JException e) {
+            throw new RuntimeException("Ошибка при синтезе речи через gtts4j", e);
         }
     }
 
