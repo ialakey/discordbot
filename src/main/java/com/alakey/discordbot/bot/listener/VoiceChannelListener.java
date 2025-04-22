@@ -21,9 +21,11 @@ public class VoiceChannelListener extends ListenerAdapter {
 
     public VoiceChannelListener(
             BlockedEntityService blockedEntityService,
-            @Value("${bot.audio-folder}") String pathAudio
+            @Value("${bot.audio-folder}") String pathAudio,
+            @Value("${telegram.bot.token}") String telegramToken,
+            @Value("${telegram.chat.id}") String chatId
     ) {
-        this.commandManager = new CommandManager(pathAudio);
+        this.commandManager = new CommandManager(pathAudio, telegramToken, chatId);
         this.blockedEntityService = blockedEntityService;
     }
 

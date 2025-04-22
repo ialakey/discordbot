@@ -12,12 +12,12 @@ public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
     private final String pathAudio;
 
-    public CommandManager(String pathAudio) {
+    public CommandManager(String pathAudio, String telegramToken, String chatId) {
         this.pathAudio = pathAudio;
 
         commands.put("!delete", new DeleteCommandTest());
         commands.put("!speak", new SpeakCommand());
-        commands.put("!record", new RecordCommand());
+        commands.put("!record", new RecordCommand(telegramToken, chatId));
     }
 
     public void handleCommand(MessageReceivedEvent event) {
