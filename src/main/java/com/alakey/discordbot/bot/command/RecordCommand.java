@@ -39,7 +39,7 @@ public class RecordCommand implements Command {
         AudioManager audioManager = guild.getAudioManager();
         MessageChannel textChannel = event.getChannel();
 
-        String directoryPath = "D:/MyApps/discordbot/src/main/resources";
+        String directoryPath = "resources";
         File directory = new File(directoryPath);
         if (!directory.exists()) {
             directory.mkdirs();
