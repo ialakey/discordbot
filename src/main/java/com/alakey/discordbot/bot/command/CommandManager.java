@@ -17,6 +17,7 @@ public class CommandManager {
 
         commands.put("!delete", new DeleteCommandTest());
         commands.put("!speak", new SpeakCommand());
+        commands.put("!record", new RecordCommand());
     }
 
     public void handleCommand(MessageReceivedEvent event) {
