@@ -48,7 +48,6 @@ public class PlayFileCommand implements Command {
             );
 
         } catch (Exception e) {
-            log.error("Ошибка воспроизведения", e);
             event.getChannel().sendMessage("Ошибка при воспроизведении: " + e.getMessage()).queue();
         }
     }
@@ -63,12 +62,10 @@ public class PlayFileCommand implements Command {
         channel.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
 
         String absolutePath = audioFile.getAbsolutePath();
-        log.info("Загружаем файл (abs path): {}", absolutePath);
 
         playerManager.loadItem(absolutePath, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                log.info("Трек загружен: {}", track.getInfo().title);
                 player.playTrack(track);
 
                 track.setUserData(event);
@@ -92,13 +89,11 @@ public class PlayFileCommand implements Command {
 
             @Override
             public void noMatches() {
-                log.warn("Lavaplayer не нашел трек");
                 event.getChannel().sendMessage("Не удалось найти трек.").queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                log.error("Ошибка загрузки трека", exception);
                 event.getChannel().sendMessage("Ошибка загрузки трека: " + exception.getMessage()).queue();
             }
         });

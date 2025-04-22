@@ -33,7 +33,6 @@ public class DiscordCacheService {
                         cachedUsernames.add(member.getUser().getName());
                     }
                 }
-                System.out.println("✅ Loaded users: " + cachedUsernames.size());
             }).onError(Throwable::printStackTrace);
         }
     }
@@ -52,7 +51,6 @@ public class DiscordCacheService {
                         cachedUsernames.add(member.getUser().getName());
                     }
                 }
-                System.out.println("♻️ Refreshed users: " + cachedUsernames.size());
             }).onError(Throwable::printStackTrace);
         }
     }

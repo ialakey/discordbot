@@ -25,8 +25,6 @@ public class TextToSpeechServiceImpl implements TextToSpeechService {
             File tempMp3 = File.createTempFile("tts_audio", ".mp3");
             gtts4j.saveFile(tempMp3.getAbsolutePath(), data, true);
 
-            log.info("Аудиофайл сохранён: {}", tempMp3.getAbsolutePath());
-
             return tempMp3;
         } catch (IOException | GTTS4JException e) {
             throw new RuntimeException("Ошибка при синтезе речи через gtts4j", e);

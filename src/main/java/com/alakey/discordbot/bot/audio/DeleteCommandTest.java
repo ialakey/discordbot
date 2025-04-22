@@ -26,7 +26,6 @@ public class DeleteCommandTest implements Command {
 
         if (!audioFile.exists()) {
             event.getChannel().sendMessage("Файл не найден: expansion_of_territory.mp3").queue();
-            log.warn("Файл не найден: {}", audioFile.getAbsolutePath());
             return;
         }
 
@@ -59,12 +58,10 @@ public class DeleteCommandTest implements Command {
         channel.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
 
         String absolutePath = audioFile.getAbsolutePath();
-        log.info("Загружаем файл (abs path): {}", absolutePath);
 
         playerManager.loadItem(absolutePath, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                log.info("Трек загружен: {}", track.getInfo().title);
                 player.playTrack(track);
 
                 player.addListener(new AudioEventAdapter() {
@@ -80,7 +77,6 @@ public class DeleteCommandTest implements Command {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                log.info("Плейлист загружен: {}", playlist.getName());
                 if (!playlist.getTracks().isEmpty()) {
                     player.playTrack(playlist.getTracks().get(0));
                 }
@@ -88,13 +84,11 @@ public class DeleteCommandTest implements Command {
 
             @Override
             public void noMatches() {
-                log.warn("Lavaplayer не нашел трек");
                 event.getChannel().sendMessage("Не удалось найти трек.").queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                log.error("Ошибка загрузки трека", exception);
                 event.getChannel().sendMessage("Ошибка загрузки трека: " + exception.getMessage()).queue();
             }
         });

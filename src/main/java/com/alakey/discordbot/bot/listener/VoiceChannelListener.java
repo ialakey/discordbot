@@ -4,7 +4,6 @@ import com.alakey.discordbot.bot.command.CommandManager;
 import com.alakey.discordbot.service.BlockedEntityService;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -38,13 +37,6 @@ public class VoiceChannelListener extends ListenerAdapter {
                 String effectiveName = member.getEffectiveName().toLowerCase();
                 String username = member.getUser().getName().toLowerCase();
 
-                log.info("Пользователь зашел в войс: {}", effectiveName);
-                log.info("Blocked Roles: {}", blockedEntityService.getBlockedRoles());
-                log.info("Blocked Names: {}", blockedEntityService.getBlockedNames());
-                log.info("User Effective Name: {}", effectiveName);
-                log.info("User Username: {}", username);
-                log.info("User Roles: {}", member.getRoles().stream().map(Role::getName).toList());
-
                 boolean hasBlockedRole = member.getRoles().stream()
                         .map(role -> role.getName().toLowerCase())
                         .anyMatch(roleName -> blockedEntityService.getBlockedRoles().contains(roleName));
@@ -54,8 +46,6 @@ public class VoiceChannelListener extends ListenerAdapter {
                         .anyMatch(blocked -> blocked.equals(effectiveName) || blocked.equals(username));
 
                 if (hasBlockedRole || hasBlockedName) {
-                    log.info("Пользователь {} будет исключен (роль: {}, имя: {})",
-                            member.getEffectiveName(), hasBlockedRole, hasBlockedName);
 
                     member.getGuild()
                             .moveVoiceMember(member, null)

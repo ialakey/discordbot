@@ -61,8 +61,6 @@ public class SpeakCommand implements Command {
             File tempMp3 = File.createTempFile("tts_audio", ".mp3");
             gtts4j.saveFile(tempMp3.getAbsolutePath(), data, true);
 
-            log.info("Аудиофайл сохранён: {}", tempMp3.getAbsolutePath());
-
             return tempMp3;
         } catch (IOException | GTTS4JException e) {
             throw new RuntimeException("Ошибка при синтезе речи через gtts4j", e);
@@ -79,12 +77,10 @@ public class SpeakCommand implements Command {
         channel.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
 
         String absolutePath = audioFile.getAbsolutePath();
-        log.info("Загружаем файл (abs path): {}", absolutePath);
 
         playerManager.loadItem(absolutePath, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                log.info("Трек загружен: {}", track.getInfo().title);
                 player.playTrack(track);
 
                 player.addListener(new AudioEventAdapter() {
@@ -100,7 +96,6 @@ public class SpeakCommand implements Command {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                log.info("Плейлист загружен: {}", playlist.getName());
                 if (!playlist.getTracks().isEmpty()) {
                     player.playTrack(playlist.getTracks().get(0));
                 }
@@ -108,13 +103,11 @@ public class SpeakCommand implements Command {
 
             @Override
             public void noMatches() {
-                log.warn("Lavaplayer не нашел трек");
                 event.getChannel().sendMessage("Не удалось найти трек.").queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                log.error("Ошибка загрузки трека", exception);
                 event.getChannel().sendMessage("Ошибка загрузки трека: " + exception.getMessage()).queue();
             }
         });
@@ -122,6 +115,5 @@ public class SpeakCommand implements Command {
 
     private void leaveVoiceChannel(VoiceChannel channel) {
         channel.getGuild().getAudioManager().closeAudioConnection();
-        log.info("Бот покинул канал {}", channel.getName());
     }
 }
