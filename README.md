@@ -10,6 +10,10 @@
 
 ## Установка и запуск
 
+```
+docker pull ialakey/discordbot:latest
+```
+
 1. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/your-username/discordbot-app.git
