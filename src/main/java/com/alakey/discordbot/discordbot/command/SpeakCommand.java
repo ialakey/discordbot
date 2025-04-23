@@ -22,7 +22,15 @@ public class SpeakCommand implements Command {
     @Override
     public void execute(MessageReceivedEvent event) {
         String messageContent = event.getMessage().getContentRaw();
-        String textToSpeak = messageContent.replace("!speak ", "").trim();
+        String[] parts = messageContent.split(" ", 3);
+
+        if (parts.length < 3) {
+            event.getChannel().sendMessage("Использование команды: !speak <канал> <текст>").queue();
+            return;
+        }
+
+        String channelName = parts[1].trim();
+        String textToSpeak = parts[2].trim();
 
         if (textToSpeak.isEmpty()) {
             event.getChannel().sendMessage("Пожалуйста, укажите текст для озвучивания!").queue();
@@ -30,11 +38,11 @@ public class SpeakCommand implements Command {
         }
 
         VoiceChannel channel = event.getGuild()
-                .getVoiceChannelsByName("дискорд заебал лагать", true)
+                .getVoiceChannelsByName(channelName, true)
                 .stream().findFirst().orElse(null);
 
         if (channel == null) {
-            event.getChannel().sendMessage("Не найден голосовой канал.").queue();
+            event.getChannel().sendMessage("Не найден голосовой канал с названием: " + channelName).queue();
             return;
         }
 

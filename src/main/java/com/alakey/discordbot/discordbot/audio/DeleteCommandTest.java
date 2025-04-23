@@ -22,6 +22,14 @@ public class DeleteCommandTest implements Command {
 
     @Override
     public void execute(MessageReceivedEvent event) {
+        String[] parts = event.getMessage().getContentRaw().split(" ", 2);
+
+        if (parts.length < 2) {
+            event.getChannel().sendMessage("Укажите название голосового канала. Пример: !delete <канал>").queue();
+            return;
+        }
+
+        String channelName = parts[1].trim();
         File audioFile = new File(pathAudio + "expansion_of_territory.mp3");
 
         if (!audioFile.exists()) {
@@ -30,11 +38,11 @@ public class DeleteCommandTest implements Command {
         }
 
         VoiceChannel channel = event.getGuild()
-                .getVoiceChannelsByName("дискорд заебал лагать", true)
+                .getVoiceChannelsByName(channelName, true)
                 .stream().findFirst().orElse(null);
 
         if (channel == null) {
-            event.getChannel().sendMessage("Не найден голосовой канал.").queue();
+            event.getChannel().sendMessage("Не найден голосовой канал с названием: " + channelName).queue();
             return;
         }
 
