@@ -1,6 +1,6 @@
-package com.alakey.discordbot.bot.audio;
+package com.alakey.discordbot.discordbot.audio;
 
-import com.alakey.discordbot.bot.command.Command;
+import com.alakey.discordbot.discordbot.command.Command;
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.player.event.*;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;

@@ -1,6 +1,6 @@
-package com.alakey.discordbot.bot.command;
+package com.alakey.discordbot.discordbot.command;
 
-import com.alakey.discordbot.bot.session.RecordingSession;
+import com.alakey.discordbot.discordbot.session.RecordingSession;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;

@@ -1,4 +1,4 @@
-package com.alakey.discordbot.bot.command;
+package com.alakey.discordbot.discordbot.command;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 

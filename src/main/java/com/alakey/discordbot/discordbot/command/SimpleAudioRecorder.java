@@ -1,4 +1,4 @@
-package com.alakey.discordbot.bot.command;
+package com.alakey.discordbot.discordbot.command;
 
 import net.dv8tion.jda.api.audio.AudioReceiveHandler;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;

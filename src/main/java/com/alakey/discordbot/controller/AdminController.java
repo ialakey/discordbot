@@ -1,6 +1,6 @@
 package com.alakey.discordbot.controller;
 
-import com.alakey.discordbot.bot.audio.AudioPlayerSendHandler;
+import com.alakey.discordbot.discordbot.audio.AudioPlayerSendHandler;
 import com.alakey.discordbot.service.*;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -15,7 +15,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import com.alakey.discordbot.bot.config.JdaConfig;
+import com.alakey.discordbot.discordbot.config.JdaConfig;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;

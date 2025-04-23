@@ -1,6 +1,6 @@
-package com.alakey.discordbot.bot.session;
+package com.alakey.discordbot.discordbot.session;
 
-import com.alakey.discordbot.bot.command.SimpleAudioRecorder;
+import com.alakey.discordbot.discordbot.command.SimpleAudioRecorder;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 import java.io.File;

@@ -1,6 +1,6 @@
-package com.alakey.discordbot.bot.listener;
+package com.alakey.discordbot.discordbot.listener;
 
-import com.alakey.discordbot.bot.command.CommandManager;
+import com.alakey.discordbot.discordbot.command.CommandManager;
 import com.alakey.discordbot.service.BlockedEntityService;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;

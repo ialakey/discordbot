@@ -1,6 +1,6 @@
 package com.alakey.discordbot.service;
 
-import com.alakey.discordbot.bot.config.JdaConfig;
+import com.alakey.discordbot.discordbot.config.JdaConfig;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;

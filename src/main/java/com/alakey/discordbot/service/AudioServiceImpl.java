@@ -1,6 +1,6 @@
 package com.alakey.discordbot.service;
 
-import com.alakey.discordbot.bot.audio.AudioPlayerSendHandler;
+import com.alakey.discordbot.discordbot.audio.AudioPlayerSendHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;

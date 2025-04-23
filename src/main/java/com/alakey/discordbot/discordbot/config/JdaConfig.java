@@ -1,6 +1,8 @@
-package com.alakey.discordbot.bot.config;
+package com.alakey.discordbot.discordbot.config;
 
-import com.alakey.discordbot.bot.listener.VoiceChannelListener;
+import com.alakey.discordbot.discordbot.listener.VoiceChannelListener;
+import com.alakey.discordbot.service.VoiceChannelInfoService;
+import com.alakey.discordbot.telegrambot.TelegramBotPoller;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,9 @@ public class JdaConfig {
     @Value("${discord.bot.token}")
     private String token;
 
+    @Value("${telegram.bot.token}")
+    private String telegramToken;
+
     @Getter
     private JDA jda;
 
@@ -39,5 +44,9 @@ public class JdaConfig {
                 .setActivity(Activity.watching("на пидоров"))
                 .build();
         jda.awaitReady();
+
+        VoiceChannelInfoService infoService = new VoiceChannelInfoService(jda);
+        TelegramBotPoller telegramBot = new TelegramBotPoller(telegramToken, infoService);
+        telegramBot.start();
     }
 }

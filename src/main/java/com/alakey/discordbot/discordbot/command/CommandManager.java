@@ -1,6 +1,6 @@
-package com.alakey.discordbot.bot.command;
+package com.alakey.discordbot.discordbot.command;
 
-import com.alakey.discordbot.bot.audio.DeleteCommandTest;
+import com.alakey.discordbot.discordbot.audio.DeleteCommandTest;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.io.File;

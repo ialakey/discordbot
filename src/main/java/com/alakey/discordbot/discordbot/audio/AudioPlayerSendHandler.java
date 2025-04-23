@@ -1,4 +1,4 @@
-package com.alakey.discordbot.bot.audio;
+package com.alakey.discordbot.discordbot.audio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
