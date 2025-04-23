@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -15,19 +17,48 @@ public class TextToSpeechServiceImpl implements TextToSpeechService {
 
     @Override
     public File synthesize(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            throw new IllegalArgumentException("Текст не может быть пустым");
+        }
+
         try {
             GTTS4J gtts4j = new GTTS4JImpl();
             String lang = "ru";
             boolean slow = false;
 
-            byte[] data = gtts4j.textToSpeech(text, lang, slow);
+            List<String> chunks = splitTextIntoChunks(text, 100);
 
-            File tempMp3 = File.createTempFile("tts_audio", ".mp3");
-            gtts4j.saveFile(tempMp3.getAbsolutePath(), data, true);
+            File mergedFile = File.createTempFile("tts_full_audio", ".mp3");
+            try (var outputStream = new java.io.FileOutputStream(mergedFile)) {
+                for (String chunk : chunks) {
+                    byte[] data = gtts4j.textToSpeech(chunk, lang, slow);
+                    outputStream.write(data);
+                }
+            }
 
-            return tempMp3;
+            return mergedFile;
         } catch (IOException | GTTS4JException e) {
             throw new RuntimeException("Ошибка при синтезе речи через gtts4j", e);
         }
+    }
+
+    private List<String> splitTextIntoChunks(String text, int maxLength) {
+        List<String> chunks = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder currentChunk = new StringBuilder();
+
+        for (String word : words) {
+            if (currentChunk.length() + word.length() + 1 > maxLength) {
+                chunks.add(currentChunk.toString().trim());
+                currentChunk = new StringBuilder();
+            }
+            currentChunk.append(word).append(" ");
+        }
+
+        if (!currentChunk.isEmpty()) {
+            chunks.add(currentChunk.toString().trim());
+        }
+
+        return chunks;
     }
 }
