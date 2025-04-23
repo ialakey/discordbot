@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-class SimpleAudioRecorder implements AudioReceiveHandler {
+public class SimpleAudioRecorder implements AudioReceiveHandler {
 
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private final String fileName;

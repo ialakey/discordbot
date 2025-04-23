@@ -1,5 +1,6 @@
 package com.alakey.discordbot.bot.command;
 
+import com.alakey.discordbot.bot.session.RecordingSession;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -7,23 +8,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.*;
-import java.nio.file.Files;
-import java.util.concurrent.*;
 
 public class RecordCommand implements Command {
-
-    private static final int RECORD_SECONDS = 60;
-
-    private final String telegramToken;
-    private final String chatId;
-
-    public RecordCommand(String telegramToken, String chatId) {
-        this.telegramToken = telegramToken;
-        this.chatId = chatId;
-    }
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -32,6 +18,11 @@ public class RecordCommand implements Command {
         String[] parts = event.getMessage().getContentRaw().split(" ", 2);
         if (parts.length < 2) {
             event.getChannel().sendMessage("Укажи имя голосового канала: `!record name_channel`").queue();
+            return;
+        }
+
+        if (RecordingSession.getInstance().isActive()) {
+            event.getChannel().sendMessage("Уже идёт запись. Останови её через `!stop`.").queue();
             return;
         }
 
@@ -50,97 +41,15 @@ public class RecordCommand implements Command {
         AudioManager audioManager = guild.getAudioManager();
         MessageChannel textChannel = event.getChannel();
 
-        String directoryPath = "resources";
-        File directory = new File(directoryPath);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        String filePath = directoryPath + "/recording_" + System.currentTimeMillis() + ".wav";
+        String filePath = "resources/recording_" + System.currentTimeMillis() + ".wav";
+        File wavFile = new File(filePath);
 
         SimpleAudioRecorder recorder = new SimpleAudioRecorder(filePath, textChannel);
         audioManager.setReceivingHandler(recorder);
         audioManager.openAudioConnection(voiceChannel);
 
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.schedule(() -> {
-            audioManager.closeAudioConnection();
-            recorder.close();
+        RecordingSession.getInstance().start(recorder, null, audioManager, wavFile);
 
-            File wavFile = new File(filePath);
-            sendRecordingToTelegram(wavFile);
-
-        }, RECORD_SECONDS, TimeUnit.SECONDS);
-    }
-
-    private File convertWavToOgg(File wavFile) throws IOException, InterruptedException {
-        File oggFile = new File(wavFile.getParent(), wavFile.getName().replace(".wav", ".ogg"));
-
-        ProcessBuilder pb = new ProcessBuilder(
-                "ffmpeg",
-                "-i", wavFile.getAbsolutePath(),
-                "-c:a", "libopus",
-                oggFile.getAbsolutePath()
-        );
-
-        pb.redirectErrorStream(true);
-        Process process = pb.start();
-        process.waitFor();
-
-        if (!oggFile.exists()) {
-            throw new IOException("Не удалось сконвертировать WAV в OGG.");
-        }
-
-        return oggFile;
-    }
-
-
-    private void sendRecordingToTelegram(File wavFile) {
-        try {
-            File oggFile = convertWavToOgg(wavFile);
-
-            String url = "https://api.telegram.org/bot" + telegramToken + "/sendVoice";
-
-            HttpRequest.BodyPublisher body = buildMultipartVoiceBody(oggFile);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", "multipart/form-data; boundary=----JavaBotBoundary")
-                    .POST(body)
-                    .build();
-
-            HttpClient.newHttpClient()
-                    .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(response -> {
-                        System.out.println("Telegram ответ: " + response.body());
-                        wavFile.delete();
-                        oggFile.delete();
-                    });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private HttpRequest.BodyPublisher buildMultipartVoiceBody(File file) throws IOException {
-        String boundary = "----JavaBotBoundary";
-        var byteArray = new StringBuilder();
-
-        byteArray.append("--").append(boundary).append("\r\n");
-        byteArray.append("Content-Disposition: form-data; name=\"chat_id\"\r\n\r\n");
-        byteArray.append(chatId).append("\r\n");
-
-        byteArray.append("--").append(boundary).append("\r\n");
-        byteArray.append("Content-Disposition: form-data; name=\"voice\"; filename=\"")
-                .append(file.getName()).append("\"\r\n");
-        byteArray.append("Content-Type: audio/ogg\r\n\r\n");
-
-        byte[] fileBytes = Files.readAllBytes(file.toPath());
-        byte[] prefix = byteArray.toString().getBytes();
-        byte[] suffix = ("\r\n--" + boundary + "--\r\n").getBytes();
-
-        return HttpRequest.BodyPublishers.ofByteArrays(
-                java.util.List.of(prefix, fileBytes, suffix)
-        );
+        textChannel.sendMessage("Запись начата в канале: " + channelName + ". Останови командой `!stop`.").queue();
     }
 }

@@ -17,7 +17,8 @@ public class CommandManager {
 
         commands.put("!delete", new DeleteCommandTest());
         commands.put("!speak", new SpeakCommand());
-        commands.put("!record", new RecordCommand(telegramToken, chatId));
+        commands.put("!record", new RecordCommand());
+        commands.put("!stop", new StopCommand(telegramToken, chatId));
     }
 
     public void handleCommand(MessageReceivedEvent event) {
