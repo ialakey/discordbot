@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,9 @@ public class JdaConfig {
     @Value("${telegram.bot.token}")
     private String telegramToken;
 
+    @Value("${discord.bot.guildById}")
+    private String guildById;
+
     @Getter
     private JDA jda;
 
@@ -38,15 +42,19 @@ public class JdaConfig {
                         GatewayIntent.GUILD_MEMBERS
                 )
                 .enableCache(CacheFlag.MEMBER_OVERRIDES)
-                .addEventListeners(
-                        voiceChannelListener
-                )
+                .addEventListeners(voiceChannelListener)
                 .setActivity(Activity.watching("на пидоров"))
                 .build();
         jda.awaitReady();
 
+        Guild guild = jda.getGuildById(guildById);
+        if (guild == null) {
+            throw new RuntimeException("Не удалось найти гильдию с ID: " + guildById);
+        }
+
         VoiceChannelInfoService infoService = new VoiceChannelInfoService(jda);
-        TelegramBotPoller telegramBot = new TelegramBotPoller(telegramToken, infoService);
+
+        TelegramBotPoller telegramBot = new TelegramBotPoller(telegramToken, infoService, guild);
         telegramBot.start();
     }
 }
