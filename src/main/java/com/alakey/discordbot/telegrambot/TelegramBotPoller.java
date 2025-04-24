@@ -4,6 +4,7 @@ import com.alakey.discordbot.discordbot.audio.AudioPlayerSendHandler;
 import com.alakey.discordbot.service.VoiceChannelInfoService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -95,6 +97,19 @@ public class TelegramBotPoller {
                 String fileId = voice.path("file_id").asText();
 
                 sendVoiceMessageToDiscord(chatId, channelName, fileId);
+                deleteMessage(chatId, message.path("message_id").asInt());
+            }
+
+            if (text.equals("/case")) {
+                String baseMessage = "Кто пойдет за кейсом?";
+                String telegramText = baseMessage + "\n" + buildTelegramMentions();
+                String discordText = baseMessage + " @everyone";
+
+                sendMessageUsername(chatId, telegramText);
+
+                discordGuild.getTextChannelsByName("основной", true).stream().findFirst()
+                        .ifPresent(channel -> channel.sendMessage(discordText).queue());
+
                 deleteMessage(chatId, message.path("message_id").asInt());
             }
         }
@@ -192,6 +207,24 @@ public class TelegramBotPoller {
         }
     }
 
+    private void sendMessageUsername(long chatId, String messageText) {
+        try {
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.put("chat_id", chatId);
+            payload.put("text", messageText);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl + "sendMessage"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                    .build();
+
+            HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private String escape(String text) {
         return text.replace("\"", "\\\"")
                 .replace("\n", "\\n");
@@ -216,5 +249,24 @@ public class TelegramBotPoller {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String buildTelegramMentions() {
+        return String.join(" ", getTelegramUsernames());
+    }
+
+    private List<String> getTelegramUsernames() {
+        return List.of(
+                "@z3r01n9",
+                "@Walker6054",
+                "@oxxxsytop",
+                "@literallyAlan",
+                "@Romulq",
+                "@Mikhailq_gg",
+                "@van_gubin",
+                "@lIIllIIlIlI",
+                "@Yuity31",
+                "@i_alakey"
+        );
     }
 }

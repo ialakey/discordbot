@@ -19,6 +19,7 @@ public class CommandManager {
         commands.put("!speak", new SpeakCommand());
         commands.put("!record", new RecordCommand());
         commands.put("!stop", new StopCommand(telegramToken, chatId));
+        commands.put("!case", new CaseCommand(telegramToken, chatId));
     }
 
     public void handleCommand(MessageReceivedEvent event) {
