@@ -68,12 +68,14 @@ public class TelegramBotPoller {
             if (text.equals("/vcinfo")) {
                 String info = infoService.getDetailedVoiceChannelInfo();
                 sendMessage(chatId, info);
+                deleteMessage(chatId, message.path("message_id").asInt());
             }
 
             if (text.startsWith("/sendvoice")) {
                 String[] parts = text.split(" ", 2);
                 if (parts.length < 2) {
                     sendMessage(chatId, "Неверный формат команды. Используйте: /sendvoice <имя_канала> (в ответ на голосовое сообщение)");
+                    deleteMessage(chatId, message.path("message_id").asInt());
                     continue;
                 }
                 String channelName = parts[1];
@@ -93,6 +95,7 @@ public class TelegramBotPoller {
                 String fileId = voice.path("file_id").asText();
 
                 sendVoiceMessageToDiscord(chatId, channelName, fileId);
+                deleteMessage(chatId, message.path("message_id").asInt());
             }
         }
     }
@@ -120,7 +123,6 @@ public class TelegramBotPoller {
 
             voiceChannel.getGuild().getAudioManager().openAudioConnection(voiceChannel);
             playAudioAndLeaveAfter(voiceChannel, audioUrl);
-            sendMessage(chatId, "Голосовое сообщение отправлено в канал: " + channelName);
         } catch (Exception e) {
             e.printStackTrace();
             sendMessage(chatId, "Ошибка при отправке голосового сообщения.");
@@ -193,5 +195,26 @@ public class TelegramBotPoller {
     private String escape(String text) {
         return text.replace("\"", "\\\"")
                 .replace("\n", "\\n");
+    }
+
+    private void deleteMessage(long chatId, int messageId) {
+        try {
+            String payload = """
+            {
+              \"chat_id\": %d,
+              \"message_id\": %d
+            }
+            """.formatted(chatId, messageId);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl + "deleteMessage"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload))
+                    .build();
+
+            HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

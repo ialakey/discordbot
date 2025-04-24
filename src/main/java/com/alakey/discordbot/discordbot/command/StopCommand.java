@@ -60,7 +60,6 @@ public class StopCommand implements Command {
             HttpClient.newHttpClient()
                     .sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenAccept(response -> {
-                        System.out.println("Telegram ответ: " + response.body());
                         wavFile.delete();
                         oggFile.delete();
                     });
