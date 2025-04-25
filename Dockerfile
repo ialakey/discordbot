@@ -8,8 +8,15 @@ RUN ./gradlew bootJar --no-daemon
 # Stage 2: Run the application
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
 
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
 COPY src/main/resources/audio/ audio/
+
+RUN mkdir -p resources
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
